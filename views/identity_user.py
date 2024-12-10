@@ -21,13 +21,13 @@ with tab2:
     st.markdown(f"""
                 #### User information
 
-                Email address: **{st.context.headers.get("X-Forwarded-Email")}**
+                **Email address**: {st.context.headers.get("X-Forwarded-Email")}
 
-                Username: **{st.context.headers.get("X-Forwarded-Preferred-Username")}**
+                **Username**: {st.context.headers.get("X-Forwarded-Preferred-Username")}
+                
+                **User**: {st.context.headers.get("X-Forwarded-User")}
 
-                User: **{st.context.headers.get("X-Forwarded-User")}**
-
-                IP address: **{st.context.headers.get("X-Real-Ip")}**
+                **IP address**: {st.context.headers.get("X-Real-Ip")}
                 """)
 
     st.markdown("#### All headers")
