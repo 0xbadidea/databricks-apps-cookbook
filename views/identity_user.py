@@ -1,16 +1,33 @@
 import streamlit as st
 
-st.header("Identity, users, and groups")
+st.header(body="Identity, users, and groups", divider=True)
 
-st.markdown("""
-* How to get headers
-* How to check in which groups user is
-* https://databricks-sdk-py.readthedocs.io/en/latest/workspace/iam/groups.html
-""")
+st.subheader("Get current user information")
 
-st.code(st.context.headers.to_dict())
+tab1, tab2 = st.tabs(["Code snippet", "Try it"])
 
-st.code(st.context.headers.get("X-Forwarded-Email"))
-st.code(st.context.headers.get("X-Forwarded-Preferred-Username"))
-st.code(st.context.headers.get("X-Forwarded-User"))
-st.code(st.context.headers.get("X-Real-Ip"))
+with tab1:
+    st.code("""
+    import streamlit as st
+            
+    email = st.context.headers.get("X-Forwarded-Email")
+    username = st.context.headers.get("X-Forwarded-Preferred-Username")
+    user  = st.context.headers.get("X-Forwarded-User")
+    ip = st.context.headers.get("X-Real-Ip")
+    """)
+
+
+with tab2:
+    st.markdown(f""")
+                #### User information
+                Email address: **{st.context.headers.get("X-Forwarded-Email")}**
+
+                Username: **{st.context.headers.get("X-Forwarded-Preferred-Username")}**
+
+                User: **{st.context.headers.get("X-Forwarded-User")}**
+
+                IP address: **{st.context.headers.get("X-Real-Ip")}**
+                """)
+
+    st.markdown("#### All headers")
+    st.json(st.context.headers.to_dict())

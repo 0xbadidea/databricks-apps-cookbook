@@ -1,7 +1,14 @@
 # Todo
-* Pin packages
+* Pin packages in requirements.txt
+* Typing
+* Error handling
+* Tests
 
 # Ideas
-* Identity category: get headers, groups, email, etc.
-https://databricks.slack.com/archives/C05E5R3F57B/p1733514140783029?thread_ts=1733242086.410069&cid=C05E5R3F57B
+* Model Serving
+    * Call model
+    * Call FMAPI? Chat?
+* Workflows
+    * Trigger workflow
+    * Get workflow results
 * Working with Genie API
