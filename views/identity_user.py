@@ -18,8 +18,9 @@ with tab1:
 
 
 with tab2:
-    st.markdown(f""")
+    st.markdown(f"""
                 #### User information
+
                 Email address: **{st.context.headers.get("X-Forwarded-Email")}**
 
                 Username: **{st.context.headers.get("X-Forwarded-Preferred-Username")}**
