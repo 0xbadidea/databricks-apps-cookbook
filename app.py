@@ -57,8 +57,13 @@ pages = {
     # ],
     "Identity, users, and groups": [
         st.Page(
-            "views/identity.py",
+            "views/identity_user.py",
             title="Get current user",
+            icon=":material/fingerprint:",
+        ),
+        st.Page(
+            "views/identity_groups.py",
+            title="Check group membership",
             icon=":material/fingerprint:",
         )
     ],
