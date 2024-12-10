@@ -2,7 +2,7 @@ import os
 import io
 import streamlit as st
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.catalog import SecurableType, Privilege
+from databricks.sdk.service.catalog import SecurableType
 
 w = WorkspaceClient()
 
@@ -107,7 +107,7 @@ with tab2:
                         f"/Volumes/{catalog}/{schema}/{volume_name}/{file_name}"
                     )
                     w.files.upload(volume_file_path, binary_data, overwrite=True)
-                    volume_url = f"https://{os.getenv("DATABRICKS_HOST")}/explore/data/volumes/{catalog}/{schema}/{volume_name}"
+                    volume_url = f'https://{os.getenv("DATABRICKS_HOST")}/explore/data/volumes/{catalog}/{schema}/{volume_name}'
                     st.success(
                         f"File '{file_name}' successfully uploaded to **{upload_volume_path}**. [Go to volume]({volume_url}).",
                         icon="✅",
