@@ -10,10 +10,10 @@ with tab1:
     st.code("""
     import streamlit as st
             
-    email = st.context.headers.get("X-Forwarded-Email")
-    username = st.context.headers.get("X-Forwarded-Preferred-Username")
-    user  = st.context.headers.get("X-Forwarded-User")
-    ip = st.context.headers.get("X-Real-Ip")
+    email = st.context.headers.get('X-Forwarded-Email')
+    username = st.context.headers.get('X-Forwarded-Preferred-Username')
+    user  = st.context.headers.get('X-Forwarded-User')
+    ip = st.context.headers.get('X-Real-Ip')
     """)
 
 
