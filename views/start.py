@@ -23,13 +23,6 @@ with col1:
             label="Write to a table",
             icon=":material/table_view:",
         )
-    with st.container(border=True):
-        st.subheader("Model serving")
-        st.page_link(
-            page="views/model_serving_llm.py",
-            label="Call an LLM enpoint",
-            icon=":material/experiment:",
-        )
 
 with col2:
     with st.container(border=True):
@@ -47,7 +40,12 @@ with col2:
 
 with col3:
     with st.container(border=True):
-        st.markdown("### Model serving")
+        st.subheader("Model serving")
+        st.page_link(
+            page="views/model_serving_llm.py",
+            label="Call an LLM enpoint",
+            icon=":material/experiment:",
+        )
 
 st.header(body="Links", divider=True)
 
