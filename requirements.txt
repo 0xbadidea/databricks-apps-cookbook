@@ -1,3 +1,4 @@
 databricks-sdk
 databricks-sql-connector
+openai
 streamlit==1.40.0

@@ -7,6 +7,10 @@ st.subheader("Get current user information")
 tab1, tab2 = st.tabs(["Code snippet", "Try it"])
 
 with tab1:
+    st.markdown(
+        "This code snipped gets information about the user currently accessing this Databricks App extracted from the [HTTP headers contained in the request to the app](https://docs.databricks.com/en/dev-tools/databricks-apps/app-development.html#what-http-headers-are-passed-to-databricks-apps)."
+    )
+
     st.code("""
     import streamlit as st
             
@@ -24,7 +28,7 @@ with tab2:
                 **Email address**: {st.context.headers.get("X-Forwarded-Email")}
 
                 **Username**: {st.context.headers.get("X-Forwarded-Preferred-Username")}
-                
+
                 **User**: {st.context.headers.get("X-Forwarded-User")}
 
                 **IP address**: {st.context.headers.get("X-Real-Ip")}

@@ -17,7 +17,7 @@ with tab1:
             
     w = WorkspaceClient()
             
-    download_file_path = "/Volumes/catalog/schema/volume_name/file.csv
+    download_file_path = "/Volumes/catalog/schema/volume_name/file.csv"
             
     try:
         resp = w.files.download(download_file_path)

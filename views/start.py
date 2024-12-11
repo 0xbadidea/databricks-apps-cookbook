@@ -4,8 +4,6 @@ st.markdown("""
 ### Welcome to the Databricks Apps Cookbook!
             
 These recipes will have you serve some tasty apps to your users in no time. Have a great recipe to share? Please raise a pull request on GitHub!
-            
-**What are you cooking up today?**
 """)
 
 st.header(body="Recipes", divider=True)
@@ -24,6 +22,13 @@ with col1:
             page="views/tables_write.py",
             label="Write to a table",
             icon=":material/table_view:",
+        )
+    with st.container(border=True):
+        st.subheader("Model serving")
+        st.page_link(
+            page="views/model_serving_llm.py",
+            label="Call an LLM enpoint",
+            icon=":material/experiment:",
         )
 
 with col2:

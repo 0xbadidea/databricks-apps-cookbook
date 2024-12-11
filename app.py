@@ -39,7 +39,7 @@ pages = {
     "Work with model serving": [
         st.Page(
             "views/model_serving_llm.py",
-            title="Call a LLM",
+            title="Call an LLM endpoint",
             icon=":material/experiment:",
         )
     ],
@@ -61,11 +61,11 @@ pages = {
             title="Get current user",
             icon=":material/fingerprint:",
         ),
-        st.Page(
-            "views/identity_groups.py",
-            title="Check group membership",
-            icon=":material/fingerprint:",
-        )
+        # st.Page(
+        #     "views/identity_groups.py",
+        #     title="Check group membership",
+        #     icon=":material/fingerprint:",
+        # )
     ],
     # "Work with vector search": [
     #     st.Page(
