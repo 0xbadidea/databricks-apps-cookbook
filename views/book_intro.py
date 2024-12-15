@@ -24,7 +24,8 @@ recipes = [
         {"label": "Analyze Image", "page": "views/ml_analyze_image.py"},
     ],
     [
-        {"label": "Trigger a Workflow", "page": "views/workflows_trigger.py"},
+        {"label": "Trigger a Pipeline", "page": "views/pipelines_trigger.py"},
+        {"label": "Trigger a Job", "page": "views/workflows_trigger.py"},
         {"label": "Get Job Results", "page": "views/workflows_get_results.py"},
     ],
     [

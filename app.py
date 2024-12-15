@@ -55,6 +55,11 @@ pages = {
     ],
     "Workflows": [
         st.Page(
+            "views/pipelines_trigger.py",
+            title="Trigger a Pipeline with Inputs",
+            icon=":material/valve:",
+        ),
+        st.Page(
             "views/workflows_trigger.py",
             title="Trigger a Job with Inputs",
             icon=":material/valve:",
