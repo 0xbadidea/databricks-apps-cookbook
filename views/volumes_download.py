@@ -4,32 +4,26 @@ from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
-st.header(body="Working with Unity Catalog volumes", divider=True)
+st.header(body="Volumes", divider=True)
+st.subheader("Download a File")
 
-st.subheader("Download a file from a volume")
-
-tab1, tab2 = st.tabs(["Code snippet", "Try it"])
+tab1, tab2 = st.tabs(["Code", "Try It"])
 
 with tab1:
     st.code("""
+    import os
     import streamlit as st
     from databricks.sdk import WorkspaceClient
             
     w = WorkspaceClient()
             
     download_file_path = "/Volumes/catalog/schema/volume_name/file.csv"
-            
-    try:
-        resp = w.files.download(download_file_path)
-        file_data = resp.contents.read()
 
-        file_name = os.path.basename(download_file_path)
-
-        print("File downloaded successfully.")
-            
-        st.download_button(label="Download", data=file_data, file_name=file_name)
-    except Exception as e:
-        st.error(f"Error downloading file: {str(e)}")
+    response = w.files.download(download_file_path)
+    file_data = response.contents.read()
+    file_name = os.path.basename(download_file_path)
+        
+    st.download_button(label="Download", data=file_data, file_name=file_name)
             
     
     """)

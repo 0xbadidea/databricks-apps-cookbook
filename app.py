@@ -5,82 +5,86 @@ st.logo("assets/logo.svg")
 st.title("📖 Databricks Apps Cookbook 🍳")
 
 pages = {
-    "Start here": [
+    "": [
         st.Page(
-            "views/start.py",
-            title="Get cooking with Databricks Apps",
+            "views/book_intro.py",
+            title="Book Intro",
             icon=":material/skillet_cooktop:",
-        )
+        ),
     ],
-    "Work with tables": [
+    "Tables": [
         st.Page(
             "views/tables_read.py",
-            title="Read from a table",
+            title="Read a Table",
             icon=":material/table_view:",
         ),
         st.Page(
-            "views/tables_write.py",
-            title="Write to a table",
-            icon=":material/table_view:",
+            "views/tables_edit.py",
+            title="Edit a Table",
+            icon=":material/edit_document:",
         ),
     ],
-    "Work with volumes": [
+    "Volumes": [
         st.Page(
             "views/volumes_upload.py",
-            title="Upload a file",
-            icon=":material/folder_open:",
+            title="Upload a File",
+            icon=":material/publish:",
         ),
         st.Page(
             "views/volumes_download.py",
-            title="Download a file",
-            icon=":material/folder_open:",
+            title="Download a File",
+            icon=":material/download:",
         ),
     ],
-    "Work with model serving": [
+    "Machine Learning": [
         st.Page(
-            "views/model_serving_llm.py",
-            title="Call an LLM endpoint",
+            "views/ml_serving_invoke.py",
+            title="Invoke a Model",
             icon=":material/experiment:",
+        ),
+        st.Page(
+            "views/ml_vector_search.py",
+            title="Call Vector Search",
+            icon=":material/search:",
+        ),
+        st.Page(
+            "views/ml_analyze_image.py",
+            title="Analyze Image",
+            icon=":material/add_photo_alternate:",
         )
     ],
-    # "Work with workflows": [
-    #     st.Page(
-    #         "views/workflows_trigger.py",
-    #         title="Trigger workflow with inputs",
-    #         icon=":material/account_tree:",
-    #     ),
-    #     st.Page(
-    #         "views/workflows_get_results.py",
-    #         title="Get workflow results",
-    #         icon=":material/account_tree:",
-    #     ),
-    # ],
-    "Identity, users, and groups": [
+    "Workflows": [
         st.Page(
-            "views/identity_user.py",
-            title="Get current user",
+            "views/workflows_trigger.py",
+            title="Trigger a Job with Inputs",
+            icon=":material/valve:",
+        ),
+        st.Page(
+            "views/workflows_get_results.py",
+            title="Get Job Results",
+            icon=":material/account_tree:",
+        ),
+    ],
+    "Users": [
+        st.Page(
+            "views/users_get_current.py",
+            title="Get Current User",
             icon=":material/fingerprint:",
         ),
-        # st.Page(
-        #     "views/identity_groups.py",
-        #     title="Check group membership",
-        #     icon=":material/fingerprint:",
-        # )
+        st.Page(
+            "views/users_get_groups.py",
+            title="Get User Groups",
+            icon=":material/groups:",
+        )
     ],
-    # "Work with vector search": [
-    #     st.Page(
-    #         "views/vector_search.py",
-    #         title="Working with vector search",
-    #         icon=":material/search:",
-    #     ),
-    # ],
-    # "Work with clusters": [
-    #     st.Page(
-    #         "views/cluster.py",
-    #         title="Working with clusters",
-    #         icon=":material/host:",
-    #     )
-    # ],
+    "Compute": [
+        st.Page(
+            "views/compute_connect.py",
+            title="Connect to Compute",
+            icon=":material/lan:",
+        )
+    ,
+    ]
 }
 
 pg = st.navigation(pages)

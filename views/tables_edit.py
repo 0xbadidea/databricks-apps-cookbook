@@ -4,10 +4,9 @@ from databricks import sql
 from databricks.sdk.core import Config, oauth_service_principal
 import streamlit as st
 
-# Page title
-st.title("Interactive Data Editor")
+st.header(body="Tables", divider=True)
+st.subheader("Edit a Table")
 
-# Ensure environment is set correctly
 assert getenv("DATABRICKS_HTTP_PATH"), "DATABRICKS_HTTP_PATH must be set in app.yaml."
 
 def credential_provider():
@@ -27,10 +26,8 @@ data = pd.DataFrame({
     "review_score": [5, 4, 3, 2, 5],
 })
 
-# Input table name
-table_name = st.text_input("Enter Table Name (e.g., catalog.schema.table):")
+table_name = st.text_input("Specify a three-level Unity Catalog table name (i.e., catalog.schema.table_name):")
 
-# Load data
 if table_name:
     try:
         with sql.connect(
@@ -44,9 +41,7 @@ if table_name:
         st.error(f"Failed to load table {table_name}: {e}")
         st.write("Using mock data instead.")
 
-# Display editable DataFrame
 st.data_editor(data, num_rows="dynamic", hide_index=True)
 
-# Placeholder to save changes
 if st.button("Save Changes"):
     st.write("Changes saved in memory only. Implement persistence as needed.")

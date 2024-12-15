@@ -3,23 +3,21 @@ from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
-st.header(body="Identity, users, and groups", divider=True)
-
-st.subheader("Check group membership")
+st.header(body="Users", divider=True)
+st.subheader("Get User Groups")
 
 tab1, tab2 = st.tabs(["Code snippet", "Try it"])
 
 with tab1:
-    # current_user = st.context.headers.get("X-Forwarded-Email")
-    current_user = "pascal.vogel@databricks.com"
+    current_user = st.context.headers.get("X-Forwarded-Email")
     st.markdown(f"The current user is **{current_user}**.")
     group_name = st.text_input(
-        f"Check if {current_user} is a member of the following group:",
+        f"Check if {current_user} belongs to this group:",
         placeholder="my_group_name",
     )
     if st.button("Check membership"):
         try:
-            user = w.users.get(id="pascal.vogel@databricks.com")
+            user = w.users.get(id=current_user)
             print(user)
         except Exception as e:
             print(e)

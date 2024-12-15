@@ -4,32 +4,27 @@ import streamlit as st
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.catalog import SecurableType
 
+databricks_host = os.getenv("DATABRICKS_HOST")
 w = WorkspaceClient()
 
-st.header(body="Working with Unity Catalog volumes", divider=True)
+st.header(body="Volumes", divider=True)
+st.subheader("Upload a File")
 
-st.subheader("Upload a file to a volume")
-
-tab1, tab2 = st.tabs(["Code snippet", "Try it"])
+tab1, tab2 = st.tabs(["Code", "Try It"])
 
 with tab1:
     st.code("""
     import streamlit as st
     from databricks.sdk import WorkspaceClient
-            
+    
     w = WorkspaceClient()
-            
+    
     uploaded_file = st.file_uploader()
-            
-    try:
-        file_bytes = uploaded_file.read()
-        binary_data = io.BytesIO(file_bytes)
-        w.files.upload("/Volumes/catalog/schema/volume_name/file_name.csv", binary_data, overwrite=True)
-        print("File uploaded successfully.")
-    except Exception as e:
-        print(f"Error: {e}")
+    
+    file_bytes = uploaded_file.read()
+    binary_data = io.BytesIO(file_bytes)
+    w.files.upload("/Volumes/catalog/schema/volume_name/file_name.csv", binary_data, overwrite=True)
     """)
-
 
 def check_upload_permissions(volume_name: str):
     try:
@@ -52,7 +47,6 @@ def check_upload_permissions(volume_name: str):
         return "Insufficient permissions: Required privileges not found."
     except Exception as e:
         return f"Error: {e}"
-
 
 if "volume_check_success" not in st.session_state:
     st.session_state.volume_check_success = False
@@ -107,7 +101,7 @@ with tab2:
                         f"/Volumes/{catalog}/{schema}/{volume_name}/{file_name}"
                     )
                     w.files.upload(volume_file_path, binary_data, overwrite=True)
-                    volume_url = f'https://{os.getenv("DATABRICKS_HOST")}/explore/data/volumes/{catalog}/{schema}/{volume_name}'
+                    volume_url = f'https://{databricks_host}/explore/data/volumes/{catalog}/{schema}/{volume_name}'
                     st.success(
                         f"File '{file_name}' successfully uploaded to **{upload_volume_path}**. [Go to volume]({volume_url}).",
                         icon="✅",
