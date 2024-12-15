@@ -43,14 +43,16 @@ for col, links in zip(columns, recipes):
             for link in links:
                 st.page_link(page=link["page"], label=link["label"])
 
-st.header("Useful Links", divider=True)
+st.header("🔗 Useful Links", divider=True)
 cola, colb, colc = st.columns(3)
 
 with cola:
     st.markdown("""
     #### Apps Documentation
     [AWS](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html)
+
     [Azure](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/databricks-apps/)
+
     [Python SDK](https://databricks-sdk-py.readthedocs.io/en/latest/)
     """)
 
