@@ -1,41 +1,22 @@
 import streamlit as st
+from view_groups import groups
 
 st.markdown("""Welcome!
 
-Ready to serve some **delightful apps** to your users? You're in the right place!  
+Ready to serve some **delightful web apps** to your users? You're in the right place!  
 These recipes will help you quickly build flexible and engaging apps directly on Databricks.  
 
 Cooked up a great recipe to share? [Contribute on GitHub!](https://github.com/databricks) 💡
 """)
 
 st.header("🔥 Recipes", divider=True)
-recipes = [
-    [
-        {"label": "Read a Table", "page": "views/tables_read.py"},
-        {"label": "Edit a Table", "page": "views/tables_edit.py"},
-    ],
-    [
-        {"label": "Upload a File", "page": "views/volumes_upload.py"},
-        {"label": "Download a File", "page": "views/volumes_download.py"},
-    ],
-    [
-        {"label": "Invoke a Model", "page": "views/ml_serving_invoke.py"},
-        {"label": "Call Vector Search", "page": "views/ml_vector_search.py"},
-        {"label": "Analyze Image", "page": "views/ml_analyze_image.py"},
-    ],
-    [
-        {"label": "Trigger a Pipeline", "page": "views/pipelines_trigger.py"},
-        {"label": "Trigger a Job", "page": "views/workflows_trigger.py"},
-        {"label": "Get Job Results", "page": "views/workflows_get_results.py"},
-    ],
-    [
-        {"label": "Get Current User", "page": "views/users_get_current.py"},
-        {"label": "Get User Groups", "page": "views/users_get_groups.py"},
-    ],
-    [
-        {"label": "Connect to Compute", "page": "views/compute_connect.py"},
-    ],
-]
+recipes = []
+for group in groups:
+    if group.get("title"):
+        recipe_group = []
+        for view in group["views"]:
+            recipe_group.append({"label": view.get("label"), "page": view.get("page")})
+        recipes.append(recipe_group)
 
 columns = st.columns(len(recipes))
 for col, links in zip(columns, recipes):
@@ -45,9 +26,9 @@ for col, links in zip(columns, recipes):
                 st.page_link(page=link["page"], label=link["label"])
 
 st.header("🔗 Useful Links", divider=True)
-cola, colb, colc = st.columns(3)
+col_a, col_b, col_c = st.columns(3)
 
-with cola:
+with col_a:
     st.markdown("""
     #### Apps Documentation
     [AWS](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html)
@@ -57,13 +38,24 @@ with cola:
     [Python SDK](https://databricks-sdk-py.readthedocs.io/en/latest/)
     """)
 
-with colb:
+with col_b:
     st.markdown("""
     #### More Examples
     [Databricks App Templates](https://github.com/databricks/app-templates)
     """)
+    st.markdown("""
+    #### Other Supported Frameworks
+    [Dash](https://dash.plotly.com/): Create interactive analytical dashboards.  
 
-with colc:
+    [Flask](https://flask.palletsprojects.com/): Build backend-heavy apps with custom APIs.  
+
+    [Shiny](https://shiny.posit.co/): Develop interactive web applications.  
+
+    [Gradio](https://gradio.app/): Quickly prototype machine learning models with user-friendly web interfaces.
+    """
+    )
+
+with col_c:
     st.markdown("""
     #### Blogs
     [Building Data Applications](https://www.linkedin.com/pulse/building-data-applications-databricks-apps-ivan-trusov-6pjwf/)
