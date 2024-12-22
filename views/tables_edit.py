@@ -16,7 +16,7 @@ st.subheader("Edit a Table")
 st.write(
     "Streamline your data workflows on Databricks by interactively editing a Catalog table and saving the changes directly back."
 )
-tab_a, tab_b, tab_c = st.tabs(["Try", "Code", "Troubleshoot"])
+tab_a, tab_b, tab_c = st.tabs(["Try", "Implement", "Troubleshoot"])
 
 def execute_sql_query(query, fetch=True):
     try:

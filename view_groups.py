@@ -37,7 +37,6 @@ groups = [
         "title": "Users",
         "views": [
             {"label": "Get Current User", "page": "views/users_get_current.py", "icon": ":material/fingerprint:"},
-            {"label": "Get User Groups", "page": "views/users_get_groups.py", "icon": ":material/groups:"},
         ],
     },
     {

@@ -3,7 +3,7 @@ import streamlit as st
 st.header(body="Users", divider=True)
 st.subheader("Get Current User")
 
-tab1, tab2 = st.tabs(["Code Snippet", "Try it"])
+tab1, tab2 = st.tabs(["Implement", "Try"])
 
 with tab1:
     st.markdown(

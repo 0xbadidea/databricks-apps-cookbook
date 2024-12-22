@@ -7,7 +7,7 @@ from databricks.sdk.core import Config, oauth_service_principal
 st.header(body="Tables", divider=True)
 st.subheader("Read a Table")
 st.write("This recipe fetches and displays a Catalog table using Python SQL.")
-tab_a, tab_b, tab_c = st.tabs(["Try It", "Code", "Troubleshoot"])
+tab_a, tab_b, tab_c = st.tabs(["Try", "Implement", "Troubleshoot"])
 
 databricks_host = os.getenv("DATABRICKS_HOST")
 databricks_client_id = os.getenv("DATABRICKS_CLIENT_ID")

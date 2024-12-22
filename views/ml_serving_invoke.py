@@ -1,5 +1,4 @@
 import os
-import io
 import streamlit as st
 from databricks.sdk import WorkspaceClient
 
@@ -8,10 +7,46 @@ oai = w.serving_endpoints.get_open_ai_client()
 
 st.header(body="Machine Learning", divider=True)
 st.subheader("Call a Model")
+st.write(
+    """
+    This recipe demonstrates how to call a model hosted on a Databricks Serving endpoint.
+    You can interact with the endpoint by providing a prompt and retrieving the model's response.
+    """
+)
+tab_a, tab_b, tab_c = st.tabs(["Try", "Implement", "Troubleshoot"])
 
-tab1, tab2 = st.tabs(["Code", "Try It"])
+def call_llm_endpoint(prompt: str):
+    try:
+        return oai.complete(prompt=prompt)
+    except Exception as e:
+        return {"error": str(e)}
 
-with tab1:
+with tab_a:
+    st.info(
+        body="""
+        Use this tool to interact with an LLM endpoint hosted on Databricks.
+        Provide a prompt and get a response from the model.
+        """,
+        icon="ℹ️",
+    )
+
+    prompt_input = st.text_area(
+        label="Enter your prompt",
+        placeholder="What is the capital of France?",
+    )
+
+    if st.button(label="Call LLM Endpoint"):
+        if not prompt_input.strip():
+            st.warning("Please enter a valid prompt.")
+        else:
+            result = call_llm_endpoint(prompt_input.strip())
+            if "error" in result:
+                st.error(f"Error calling LLM endpoint: {result['error']}")
+            else:
+                st.success("Response received successfully")
+                st.json(result)
+
+with tab_b:
     st.code("""
     import os
     from databricks.sdk import WorkspaceClient
@@ -27,33 +62,13 @@ with tab1:
         print(f"Error calling LLM endpoint: {e}")
     """)
 
-def call_llm_endpoint(prompt: str):
-    try:
-        return oai.complete(prompt=prompt)
-    except Exception as e:
-        return {"error": str(e)}
-
-with tab2:
-    st.info(
-        body="""
-        Use this tool to interact with an LLM endpoint hosted on Databricks.
-        Provide a prompt and get a response from the model.
-        """,
-        icon="ℹ️",
+with tab_c:
+    st.write("This recipe needs:")
+    st.checkbox("Databricks SDK installed", value=True)
+    st.checkbox(
+        "Databricks workspace credentials configured via environment variables or a config file",
+        value=bool(os.getenv("DATABRICKS_HOST") and os.getenv("DATABRICKS_TOKEN")),
     )
-
-    prompt_input = st.text_area(
-        label="Enter your prompt",
-        placeholder="What is the capital of France?",
+    st.write(
+        "Ensure the service principal used has sufficient permissions to access the serving endpoint. For more information, refer to the **[Databricks documentation](https://docs.databricks.com/machine-learning/serving/index.html)**."
     )
-
-    if st.button(label="Call LLM Endpoint", icon=":material/robot:"):
-        if not prompt_input.strip():
-            st.warning("Please enter a valid prompt.", icon="⚠️")
-        else:
-            result = call_llm_endpoint(prompt_input.strip())
-            if "error" in result:
-                st.error(f"Error calling LLM endpoint: {result['error']}", icon="🚨")
-            else:
-                st.success("Response received successfully", icon="✅")
-                st.json(result)

@@ -1,78 +1,74 @@
 import os
-import io
 import streamlit as st
 from databricks.sdk import WorkspaceClient
 
+st.header(body="Machine Learning", divider=True)
+st.subheader("Call a Model")
+st.write(
+    """
+    This recipe demonstrates how to call a model hosted on a Databricks Serving endpoint.
+    You can interact with the endpoint by providing a prompt and retrieving the model's response.
+    """
+)
+tab_a, tab_b, tab_c = st.tabs(["Try", "Implement", "Troubleshoot"])
+
 w = WorkspaceClient()
+oai = w.serving_endpoints.get_open_ai_client()
 
-st.header(body="Workflows", divider=True)
-st.subheader("Trigger a Pipeline with Inputs")
-
-tab1, tab2 = st.tabs(["Try It", "Code"])
-
-def trigger_dlt_pipeline(pipeline_id: str, parameters: dict = None):
+def call_llm_endpoint(prompt: str):
     try:
-        if parameters:
-            run = w.pipelines.start_by_id(pipeline_id=pipeline_id, full_refresh=False, parameters=parameters)
-        else:
-            run = w.pipelines.start_by_id(pipeline_id=pipeline_id, full_refresh=False)
-        return {
-            "run_id": run.run_id,
-            "state": "Triggered",
-        }
+        return oai.complete(prompt=prompt)
     except Exception as e:
         return {"error": str(e)}
 
-if "dlt_trigger_success" not in st.session_state:
-    st.session_state.dlt_trigger_success = False
-
-with tab1:
+with tab_a:
     st.info(
         body="""
-        To trigger a DLT pipeline, provide the pipeline ID and optional input parameters as key-value pairs.
-        Ensure the app's service principal has the necessary permissions to trigger pipelines.
+        Use this tool to interact with an LLM endpoint hosted on Databricks.
+        Provide a prompt and get a response from the model.
         """,
         icon="ℹ️",
     )
 
-    pipeline_id = st.text_input(
-        label="Specify the Pipeline ID",
-        placeholder="pipeline-id",
+    prompt_input = st.text_area(
+        label="Enter your prompt",
+        placeholder="What is the capital of France?",
     )
 
-    parameters_input = st.text_area(
-        label="Specify Input Parameters (JSON format, optional)",
-        placeholder="{\"param1\": \"value1\", \"param2\": \"value2\"}",
-    )
-
-    if st.button(label="Trigger DLT Pipeline", icon=":material/play-circle:"):
-        if not pipeline_id.strip():
-            st.warning("Please specify a valid pipeline ID.", icon="⚠️")
+    if st.button(label="Call LLM Endpoint"):
+        if not prompt_input.strip():
+            st.warning("Please enter a valid prompt.")
         else:
-            try:
-                parameters = eval(parameters_input.strip()) if parameters_input.strip() else None
-                results = trigger_dlt_pipeline(pipeline_id.strip(), parameters)
-                if "error" in results:
-                    st.error(f"Error triggering pipeline: {results['error']}", icon="🚨")
-                else:
-                    st.success("Pipeline triggered successfully", icon="✅")
-                    st.json(results)
-            except Exception as e:
-                st.error(f"Error parsing input parameters: {e}", icon="🚨")
+            result = call_llm_endpoint(prompt_input.strip())
+            if "error" in result:
+                st.error(f"Error calling LLM endpoint: {result['error']}")
+            else:
+                st.success("Response received successfully")
+                st.json(result)
 
-with tab2:
+with tab_b:
     st.code("""
+    import os
     from databricks.sdk import WorkspaceClient
 
     w = WorkspaceClient()
+    oai = w.serving_endpoints.get_open_ai_client()
 
-    pipeline_id = "pipeline-id"
-    parameters = {
-        "param1": "value1",
-        "param2": "value2"
-    }
-
-    w.pipelines.start_by_id(pipeline_id=pipeline_id, full_refresh=False, parameters=parameters)
+    prompt = "What is the capital of France?"
+    try:
+        response = oai.complete(prompt=prompt)
+        print(f"Response: {response}")
+    except Exception as e:
+        print(f"Error calling LLM endpoint: {e}")
     """)
 
-
+with tab_c:
+    st.write("This recipe needs:")
+    st.checkbox("Databricks SDK installed", value=True)
+    st.checkbox(
+        "Databricks workspace credentials configured via environment variables or a config file",
+        value=bool(os.getenv("DATABRICKS_HOST") and os.getenv("DATABRICKS_TOKEN")),
+    )
+    st.write(
+        "Ensure the service principal used has sufficient permissions to access the serving endpoint. For more information, refer to the **[Databricks documentation](https://docs.databricks.com/machine-learning/serving/index.html)**."
+    )
