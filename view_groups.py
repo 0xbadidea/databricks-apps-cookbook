@@ -34,15 +34,15 @@ groups = [
         ],
     },
     {
-        "title": "Users",
-        "views": [
-            {"label": "Get Current User", "page": "views/users_get_current.py", "icon": ":material/fingerprint:"},
-        ],
-    },
-    {
         "title": "Compute",
         "views": [
             {"label": "Connect", "page": "views/compute_connect.py", "icon": ":material/lan:"},
+        ],
+    },
+    {
+        "title": "Users",
+        "views": [
+            {"label": "Get Current User", "page": "views/users_get_current.py", "icon": ":material/fingerprint:"},
         ],
     },
 ]
