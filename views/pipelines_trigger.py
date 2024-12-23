@@ -1,73 +1,206 @@
 import os
+import time
 import streamlit as st
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.service import pipelines
 
-st.header(body="Machine Learning", divider=True)
-st.subheader("Call a Model")
+st.header(body="Workflows", divider=True)
+st.subheader("Trigger a Pipeline")
 st.write(
     """
-    This recipe demonstrates how to call a model hosted on a Databricks Serving endpoint.
-    You can interact with the endpoint by providing a prompt and retrieving the model's response.
+    Use this app to create and trigger a Delta Live Tables (DLT) pipeline in Databricks. Customize the pipeline with runtime parameters to process event data.
     """
 )
-tab_a, tab_b, tab_c = st.tabs(["Try", "Implement", "Troubleshoot"])
 
 w = WorkspaceClient()
-oai = w.serving_endpoints.get_open_ai_client()
 
-def call_llm_endpoint(prompt: str):
-    try:
-        return oai.complete(prompt=prompt)
-    except Exception as e:
-        return {"error": str(e)}
+def upload_code_to_notebook(notebook_path, code):
+    w.workspace.import_workspace(
+        path=notebook_path,
+        content=code.encode("utf-8"),
+        format="SOURCE",
+        language="PYTHON",
+        overwrite=True
+    )
+
+def create_pipeline(pipeline_name):
+    notebook_path = f'/Users/{w.current_user.me().user_name}/sdk-{time.time_ns()}'
+
+    notebook_code = '''
+    import dlt
+    from pyspark.sql.functions import *
+
+    @dlt.table(comment="Load and filter data")
+    def filtered_data():
+        source_path = spark.conf.get("source_path", "/databricks-datasets/structured-streaming/events")
+        filter = spark.conf.get("filter", "eventType = 'open'")
+
+        return (
+            spark.read.format("json").load(source_path)
+                .filter(filter)
+                .select("*", current_timestamp().alias("processed_time"))
+        )
+
+    @dlt.table(comment="Count filtered events")
+    def event_counts():
+        return (
+            dlt.read("filtered_data")
+                .groupBy("eventType")
+                .count()
+                .withColumnRenamed("count", "event_count")
+        )
+    '''
+
+    upload_code_to_notebook(notebook_path, notebook_code)
+
+    created = w.pipelines.create(
+        continuous=False,
+        name=pipeline_name,
+        libraries=[pipelines.PipelineLibrary(notebook=pipelines.NotebookLibrary(path=notebook_path))],
+        clusters=[
+            pipelines.PipelineCluster(
+                label="default",
+                serverless=True,
+                num_workers=1,
+                custom_tags={
+                    "cluster_type": "serverless",
+                }
+            )
+        ]
+    )
+
+    return created
+
+def trigger_pipeline_run(pipeline_id, source_path, filter_condition):
+    run = w.pipelines.trigger(
+        pipeline_id=pipeline_id,
+        configuration_overrides={
+            "source_path": source_path,
+            "filter": filter_condition
+        }
+    )
+    return run
+
+tab_a, tab_b, tab_c = st.tabs(["**Try**", "**Implement**", "**Setup**"])
 
 with tab_a:
-    st.info(
-        body="""
-        Use this tool to interact with an LLM endpoint hosted on Databricks.
-        Provide a prompt and get a response from the model.
-        """,
-        icon="ℹ️",
-    )
+    pipeline_name = st.text_input("Pipeline Name", f"sdk-{time.time_ns()}")
+    source_path = st.text_input("Source Path", "/databricks-datasets/structured-streaming/events")
+    filter_condition = st.text_input("Filter", "open")
 
-    prompt_input = st.text_area(
-        label="Enter your prompt",
-        placeholder="What is the capital of France?",
-    )
-
-    if st.button(label="Call LLM Endpoint"):
-        if not prompt_input.strip():
-            st.warning("Please enter a valid prompt.")
+    if st.button("Trigger Run"):
+        if not pipeline_name.strip() or not source_path.strip() or not filter_condition.strip():
+            st.warning("Please fill in all required fields.")
         else:
-            result = call_llm_endpoint(prompt_input.strip())
-            if "error" in result:
-                st.error(f"Error calling LLM endpoint: {result['error']}")
+            created_pipeline = create_pipeline(pipeline_name)
+            if created_pipeline:
+                st.success("Pipeline created successfully!")
+                run = trigger_pipeline_run(created_pipeline.pipeline_id, source_path, filter_condition)
+                if run:
+                    st.success("Pipeline run triggered successfully!")
+                    st.markdown(f"[View Pipeline]({w.config.host}/#job/{created_pipeline.pipeline_id})")
+                else:
+                    st.error("Failed to trigger pipeline run.")
             else:
-                st.success("Response received successfully")
-                st.json(result)
+                st.error("An error occurred while creating the pipeline.")
 
 with tab_b:
     st.code("""
     import os
+    import time
+    import streamlit as st
     from databricks.sdk import WorkspaceClient
+    from databricks.sdk.service import pipelines
 
     w = WorkspaceClient()
-    oai = w.serving_endpoints.get_open_ai_client()
 
-    prompt = "What is the capital of France?"
-    try:
-        response = oai.complete(prompt=prompt)
-        print(f"Response: {response}")
-    except Exception as e:
-        print(f"Error calling LLM endpoint: {e}")
+    def upload_code_to_notebook(notebook_path, code):
+        w.workspace.import_workspace(
+            path=notebook_path,
+            content=code.encode("utf-8"),
+            format="SOURCE",
+            language="PYTHON",
+            overwrite=True
+        )
+
+    def create_pipeline(pipeline_name):
+        notebook_path = f'/Users/{w.current_user.me().user_name}/sdk-{time.time_ns()}'
+
+        notebook_code = '''
+        import dlt
+        from pyspark.sql.functions import *
+
+        @dlt.table(comment="Load and filter data")
+        def filtered_data():
+            source_path = spark.conf.get("source_path", "/databricks-datasets/structured-streaming/events")
+            filter_condition = spark.conf.get("filter", "eventType = 'open'")
+
+            return (
+                spark.read.format("json").load(source_path)
+                    .filter(filter_condition)
+                    .select("*", current_timestamp().alias("processed_time"))
+            )
+
+        @dlt.table(comment="Count filtered events")
+        def event_counts():
+            return (
+                dlt.read("filtered_data")
+                    .groupBy("eventType")
+                    .count()
+                    .withColumnRenamed("count", "event_count")
+            )
+        '''
+
+        upload_code_to_notebook(notebook_path, notebook_code)
+
+        return w.pipelines.create(
+            continuous=False,
+            name=pipeline_name,
+            libraries=[pipelines.PipelineLibrary(notebook=pipelines.NotebookLibrary(path=notebook_path))],
+            clusters=[
+                pipelines.PipelineCluster(
+                    label="default",
+                    serverless=True,
+                    num_workers=1,
+                    custom_tags={
+                        "cluster_type": "serverless",
+                    }
+                )
+            ]
+        )
+
+    def trigger_pipeline_run(pipeline_id, source_path, filter_condition):
+        return w.pipelines.trigger(
+            pipeline_id=pipeline_id,
+            configuration_overrides={
+                "source_path": source_path,
+                "filter": filter_condition,
+            }
+        )
+
+    pipeline_name = st.text_input("Pipeline Name", f"sdk-{time.time_ns()}")
+    source_path = st.text_input("Source Path", "/databricks-datasets/structured-streaming/events")
+    filter_condition = st.text_input("Event Type to Filter", "open")
+
+    if st.button("Trigger Run"):
+        created_pipeline = create_pipeline(pipeline_name)
+        if created_pipeline:
+            trigger_pipeline_run(
+                created_pipeline.pipeline_id,
+                source_path,
+                filter_condition,
+            )
     """)
 
 with tab_c:
-    st.checkbox("Databricks SDK installed", value=True)
     st.checkbox(
-        "Databricks workspace credentials configured via environment variables or a config file",
-        value=bool(os.getenv("DATABRICKS_HOST") and os.getenv("DATABRICKS_TOKEN")),
+        "[Databricks SDK](https://docs.databricks.com/en/dev-tools/sdk-python.html) installed via `requirements.txt`",
+        value=True,
+    )
+    st.checkbox(
+        "[Databricks OAuth](https://docs.databricks.com/dev-tools/api/latest/authentication.html#using-oauth) credentials set in the [environment](https://docs.databricks.com/en/dev-tools/databricks-apps/configuration.html#databricks-apps-environment-variables)",
+        value=bool(os.getenv("DATABRICKS_CLIENT_ID") and os.getenv("DATABRICKS_CLIENT_SECRET")),
     )
     st.write(
-        "Ensure the service principal used has sufficient permissions to access the serving endpoint. For more information, refer to the **[Databricks documentation](https://docs.databricks.com/machine-learning/serving/index.html)**."
+        "- Ensure your [App principal](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html#how-does-databricks-apps-manage-authorization) `Can Attach To` the cluster."
     )
