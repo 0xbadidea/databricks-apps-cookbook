@@ -4,46 +4,71 @@ import streamlit as st
 from databricks import sql
 from databricks.sdk.core import Config, oauth_service_principal
 
-config = Config(
-    host=os.getenv("DATABRICKS_HOST"),
-    client_id=os.getenv("DATABRICKS_CLIENT_ID"),
-    client_secret=os.getenv("DATABRICKS_CLIENT_SECRET"),
-)
-http_path = os.getenv("DATABRICKS_HTTP_PATH")
 
 st.header(body="Tables", divider=True)
 st.subheader("Edit a Table")
 st.write(
-    "Streamline your data workflows on Databricks by interactively editing a Catalog table and saving the changes directly back."
+    "Streamline your **small** data workflows on Databricks by interactively editing a Catalog table and applying the changed rows directly back."
 )
-tab_a, tab_b, tab_c = st.tabs(["Try", "Implement", "Troubleshoot"])
 
-def execute_sql_query(query, fetch=True):
-    try:
-        with sql.connect(
-            server_hostname=config.host,
-            http_path=http_path,
-            credentials_provider=oauth_service_principal(config),
+server_hostname = os.getenv("DATABRICKS_HOST")
+http_path = os.getenv("DATABRICKS_HTTP_PATH")
+client_id = os.getenv("DATABRICKS_CLIENT_ID")
+client_secret = os.getenv("DATABRICKS_CLIENT_SECRET")
+
+
+def credential_provider():
+  config = Config(
+    host          = f"https://{server_hostname}",
+    client_id     = client_id,
+    client_secret = client_secret,
+  )
+  
+  return oauth_service_principal(config)
+
+def read_table(table_name) -> pd.DataFrame:
+    info = st.empty()
+    with sql.connect(
+        server_hostname=server_hostname,
+        http_path=http_path,
+        credentials_provider=credential_provider,
         ) as conn:
             with conn.cursor() as cursor:
+                query = f"SELECT * FROM {table_name}"
+                with info:
+                    st.info("Calling Databricks SQL...")
                 cursor.execute(query)
-                if fetch:
-                    return pd.DataFrame(
-                        cursor.fetchall(), columns=[desc[0] for desc in cursor.description]
-                    )
-    except Exception as e:
-        st.error(
-            f"Check your query, connection settings, and permissions. An error occurred: {e}."
-        )
-    return None
+                df = pd.DataFrame(cursor.fetchall())
+                info.empty()
 
-def load_table_data_or_mock(table_name):
-    if table_name:
-        data = execute_sql_query(f"SELECT * FROM {table_name}")
-        if data is not None:
-            return data
-    st.warning("Using mock data")
-    return pd.DataFrame(
+            return df
+
+
+def insert_overwrite_table(table_name, df):
+    progress = st.empty()
+    with sql.connect(
+            server_hostname=server_hostname,
+            http_path=http_path,
+            credentials_provider=credential_provider,
+    ) as conn:
+        with conn.cursor() as cursor:
+            rows = list(edited_df.itertuples(index=False))
+            values = ",".join(
+                [f"({','.join(map(repr, row))})" for row in rows]
+            )
+            with progress:
+                st.info("Calling Databricks SQL...")
+            cursor.execute(
+                f"INSERT OVERWRITE {table_name} VALUES {values}",
+            )
+            progress.empty()
+            st.success(f"Changes saved")
+
+
+tab_a, tab_b, tab_c = st.tabs(["**Try**", "**Implement**", "**Setup**"])
+
+with tab_a:
+    original_df = pd.DataFrame(
         {
             "customer_id": [f"cust_{i}" for i in range(1, 6)],
             "state": ["CA", "NY", "TX", "FL", "IL"],
@@ -58,90 +83,117 @@ def load_table_data_or_mock(table_name):
         }
     )
 
-def save_table_data(table_name, edited_data):
-    if table_name:
-        rows = [
-            (
-                ', '.join(row.index),
-                ', '.join(f"'{v}'" if isinstance(v, str) else str(v) for v in row.values),
-            )
-            for _, row in edited_data.iterrows()
-        ]
-        for columns, values in rows:
-            query = (
-                f"INSERT INTO {table_name} ({columns}) VALUES ({values}) "
-                f"ON DUPLICATE KEY UPDATE {', '.join(f'{col}=VALUES({col})' for col in columns.split(', '))}"
-            )
-            execute_sql_query(query, fetch=False)
-        st.success("Table changes have been saved.")
-    else:
-        st.warning("To persist changes, specify the table name.")
-
-with tab_c:
-    st.write("This recipe needs:")
-    st.checkbox("`DATABRICKS_HOST` set in the environment", value=bool(config.host))
-    st.checkbox(
-        "`DATABRICKS_HTTP_PATH`, i.e., the **[SQL Warehouse endpoint](https://docs.databricks.com/en/compute/sql-warehouse/create.html)**, set in the environment",
-        value=bool(http_path),
-    )
-    st.checkbox(
-        "**[Databricks OAuth](https://docs.databricks.com/dev-tools/api/latest/authentication.html#using-oauth)** credentials set in the environment",
-        value=bool(config.client_id and config.client_secret),
-    )
-    st.write(
-        "Also, ensure the app has **[permissions](https://docs.databricks.com/en/dev-tools/databricks-apps/app-development.html#app-permissions)** on the target Catalog table."
-    )
-
-with tab_a:
     table_name = st.text_input(
-        "Specify a Catalog table name:", placeholder="catalog.schema.table"
+        "Specify a Catalog table name:", 
+        placeholder="catalog.schema.table",
+        help="Copy the three-level table name from the [Catalog](https://docs.databricks.com/en/data-governance/unity-catalog/index.html#granting-and-revoking-access-to-database-objects-and-other-securable-objects-in-unity-catalog)."
     )
-    data = load_table_data_or_mock(table_name)
-    edited_data = st.data_editor(data, num_rows="dynamic", hide_index=True)
+    if table_name:
+        original_df = read_table(table_name)
+    else:
+        st.warning("Using mock data")
+    
+    edited_df = st.data_editor(original_df, num_rows="dynamic", hide_index=True)
 
-    if st.button("Save"):
-        save_table_data(table_name, edited_data)
+    df_diff = pd.concat([original_df, edited_df]).drop_duplicates(keep=False)
+    if not df_diff.empty:
+        if st.button("Save"):
+            try:
+                insert_overwrite_table(table_name, edited_df)
+            except Exception as e:
+                st.error(f"Failed: {e}.")
 
 with tab_b:
     st.code(
         """
-import os
-import pandas as pd
-from databricks import sql
-from databricks.sdk.core import Config, oauth_service_principal
+        import os
+        import pandas as pd
+        from databricks import sql
+        from databricks.sdk.core import Config, oauth_service_principal
 
-config = Config(
-    host=os.getenv("DATABRICKS_HOST"),
-    client_id=os.getenv("DATABRICKS_CLIENT_ID"),
-    client_secret=os.getenv("DATABRICKS_CLIENT_SECRET"),
-)
-http_path = os.getenv("DATABRICKS_HTTP_PATH")
+        server_hostname = os.getenv("DATABRICKS_HOST")
+        http_path = os.getenv("DATABRICKS_HTTP_PATH")
 
-def execute_sql_query(query):
-    with sql.connect(
-        server_hostname=config.host,
-        http_path=http_path,
-        credentials_provider=oauth_service_principal(config),
-    ) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(query)
-            return pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+        def credential_provider():
+            config = Config(
+                host          = f"https://{server_hostname}",
+                client_id     = os.getenv("DATABRICKS_CLIENT_ID"),
+                client_secret = os.getenv("DATABRICKS_CLIENT_SECRET"),
+            )
 
-query = "SELECT * FROM catalog.schema.table_name"
-data = execute_sql_query(query)
-print(data)
+            return oauth_service_principal(config)
+
+
+        def insert_overwrite_table(table_name, df):
+            with sql.connect(
+                    server_hostname=server_hostname,
+                    http_path=http_path,
+                    credentials_provider=credential_provider,
+            ) as conn:
+                with conn.cursor() as cursor:
+                    rows = list(edited_df.itertuples(index=False))
+                    values = ",".join(
+                        [f"({','.join(map(repr, row))})" for row in rows]
+                    )
+                    cursor.execute(
+                        f"INSERT OVERWRITE {table_name} VALUES {values}",
+                    )
+
+
+        def read_table(table_name):
+            with sql.connect(
+                server_hostname=server_hostname,
+                http_path=http_path,
+                credentials_provider=credential_provider,
+            ) as conn:
+                with conn.cursor() as cursor:
+                    query = f"SELECT * FROM {table_name}"
+                    cursor.execute(query)
+
+                    return pd.DataFrame(cursor.fetchall())
+                    
+        table_name = "catalog.schema.table_name"
+
+        original_df = read_table(table_name)
+        edited_df = st.data_editor(original_df, num_rows="dynamic", hide_index=True)
+        insert_overwrite_table(table_name, edited_df)
+        """
+    )
+    st.info(
+        """
+        #### Beyond Streamlit
+        [Dash](https://dash.plotly.com/): Replace `st.data_editor` with Dash's [`DataTable`](https://dash.plotly.com/datatable) and implement callbacks for saving changes.
+
+        [Flask](https://flask.palletsprojects.com/): Use forms to input data and integrate Databricks SQL via Flask-[SQLAlchemy](https://docs.databricks.com/en/dev-tools/sqlalchemy.html).
+
+        [Shiny](https://shiny.posit.co/): Use [`tableOutput`](https://shiny.posit.co/r/reference/shiny/latest/tableOutput.html) and reactive expressions for dynamic data paired with Databricks SQL.
+        
+        Also, check out these guides: 
+        
+        [Databricks SQL Connector for Python](https://docs.databricks.com/integrations/python/sql.html)
+
+        [A Powerful Spreadsheet in Streamlit](https://blog.streamlit.io/data-analysis-with-mito-a-powerful-spreadsheet-in-streamlit/)
         """
     )
 
-    st.info(
-        """
-        While [Streamlit](https://docs.streamlit.io/) is simple and declarative, ideal for building Python data apps, consider the other Databricks Apps-supported frameworks:
-        - **[Dash](https://dash.plotly.com/)**: Use for interactive analytical dashboards. Example: Replace `st.data_editor` with Dash's [`DataTable`](https://dash.plotly.com/datatable) and implement callbacks for saving changes.
-        - **[Flask](https://flask.palletsprojects.com/)**: Great for backend-heavy apps with custom APIs. Example: Use forms to input data and integrate Databricks SQL via Flask-SQLAlchemy: [Guide](https://docs.databricks.com/en/dev-tools/sqlalchemy.html).
-        - **[Shiny](https://shiny.posit.co/)**: Ideal for interactive web apps. Example: Use Shiny's [`tableOutput`](https://shiny.posit.co/r/reference/shiny/latest/tableOutput.html) and reactive expressions for dynamic data paired with Databricks SQL.
-        
-        Also, check out these guides: 
-        - **[Databricks SQL Connector for Python](https://docs.databricks.com/integrations/python/sql.html)**
-        - **[A Powerful Spreadsheet in Streamlit](https://blog.streamlit.io/data-analysis-with-mito-a-powerful-spreadsheet-in-streamlit/)**
-        """
+with tab_c:
+    st.checkbox(
+        "[Databricks SQL Connector](https://docs.databricks.com/en/dev-tools/python-sql-connector.html) installed via `requirements.txt`", 
+        value=True
+    )
+    st.checkbox(
+        "`DATABRICKS_SERVER_HOSTNAME` set in the [environment](https://docs.databricks.com/en/dev-tools/databricks-apps/configuration.html#databricks-apps-environment-variables)", 
+        value=bool(server_hostname)
+    )
+    st.checkbox(
+        "`DATABRICKS_HTTP_PATH`, i.e., a [SQL Warehouse endpoint](https://docs.databricks.com/en/compute/sql-warehouse/create.html), set in [`app.yaml`](https://docs.databricks.com/en/dev-tools/databricks-apps/configuration.html#databricks-apps-environment-variables)",
+        value=bool(http_path),
+    )
+    st.checkbox(
+        "[Databricks OAuth](https://docs.databricks.com/dev-tools/api/latest/authentication.html#using-oauth) credentials set in the [environment](https://docs.databricks.com/en/dev-tools/databricks-apps/configuration.html#databricks-apps-environment-variables)",
+        value=bool(client_id and client_secret),
+    )
+    st.write(
+        "- Ensure the [App principal](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html#how-does-databricks-apps-manage-authorization) " 
+        "can `MODIFY` the target table and `Can use` the SQL Warehouse."
     )

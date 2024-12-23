@@ -63,7 +63,6 @@ with tab_b:
     """)
 
 with tab_c:
-    st.write("This recipe needs:")
     st.checkbox("Databricks SDK installed", value=True)
     st.checkbox(
         "Databricks workspace credentials configured via environment variables or a config file",
