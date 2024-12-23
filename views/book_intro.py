@@ -6,9 +6,9 @@ st.markdown(
     Welcome!
 
     Ready to serve some **delightful web apps** to your users? You're in the right place!  
-    These recipes will help you quickly build flexible and engaging apps directly on Databricks.  
+    These recipes will help you quickly build flexible and engaging data apps directly on Databricks.  
 
-    Cooked up a great recipe to share? [Contribute on GitHub](https://github.com/databricks) 💡!
+    Have a great recipe to share? [Contribute on GitHub](https://github.com/pbv0/databricks-apps-cookbook) 💡!
     """
 )
 
@@ -63,7 +63,7 @@ with col_b:
 with col_c:
     st.markdown(
         """
-        #### Blogs
+        #### Highlight Blogs
         [Building Data Applications](https://www.linkedin.com/pulse/building-data-applications-databricks-apps-ivan-trusov-6pjwf/)
         """
     )

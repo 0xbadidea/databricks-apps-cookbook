@@ -7,10 +7,7 @@ from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
 
 st.header(body="Machine Learning", divider=True)
 st.subheader("Invoke a Model")
-st.write("""
-    This recipe demonstrates how to invoke a model **across classical ML and Large Language (LLMs)**
-    hosted on Databricks ML Serving with UI inputs.
-""")
+st.write("This recipe demonstrates how to invoke a model **across classical ML and Large Language (LLMs)** hosted on Databricks ML Serving with UI inputs.")
 
 tab_a, tab_b, tab_c = st.tabs(["**Try**", "**Implement**", "**Setup**"])
 
@@ -87,7 +84,7 @@ table = [
         """
     },
     {
-        "type": "Classical Models (e.g., scikit-learn, XGBoost)",
+        "type": "Classical Models",
         "param": "dataframe_records",
         "description": "JSON-serialized DataFrame in records orientation.",
         "code": """
