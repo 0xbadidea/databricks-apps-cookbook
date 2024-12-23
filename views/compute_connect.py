@@ -12,33 +12,34 @@ st.write(
 )
 tab_a, tab_b, tab_c = st.tabs(["**Try**", "**Implement**", "**Setup**"])
 
-databricks_host = os.getenv("DATABRICKS_HOST")
+server_hostname = os.getenv("DATABRICKS_HOST")
 
 
 def connect_to_cluster(cluster_id):
     return DatabricksSession.builder.remote(
-        host=databricks_host,
-        cluster_id=cluster_id
+        host=databricks_host, cluster_id=cluster_id
     ).getOrCreate()
 
 
 with tab_a:
     cluster_id = st.text_input(
-        "Specify cluster ID:", 
-        placeholder="0709-132523-cnhxf2p6", 
-        help="Copy a shared Compute [cluster ID](https://docs.databricks.com/en/workspace/workspace-details.html#cluster-url-and-id) to connect to."
+        "Specify cluster ID:",
+        placeholder="0709-132523-cnhxf2p6",
+        help="Copy a shared Compute [cluster ID](https://docs.databricks.com/en/workspace/workspace-details.html#cluster-url-and-id) to connect to.",
     )
 
     if cluster_id:
-        try:
-            spark = connect_to_cluster(cluster_id)
-            st.success("Connected 🎉!")
-        except Exception as e:
-            st.error(f"Failed to connect: {e}")
+        spark = connect_to_cluster(cluster_id)
+        st.success("Connected 🎉!")
 
     sub_tab_1, sub_tab_2 = st.tabs(["**Python**", "**SQL**"])
     with sub_tab_1:
-        input_val = st.number_input("Specify how many data points to generate:", min_value=0, value=10, step=1)
+        input_val = st.number_input(
+            "Specify how many data points to generate:",
+            min_value=0,
+            value=10,
+            step=1,
+        )
         if cluster_id:
             if st.button("Generate"):
                 try:
@@ -52,12 +53,21 @@ with tab_a:
         col_a, col_b = st.columns(2)
         with col_a:
             st.write("### Data A")
-            st.dataframe(pd.DataFrame({"id": [1, 2, 3], "value": ["A1", "A2", "A3"]}), hide_index=True)
+            st.dataframe(
+                pd.DataFrame({"id": [1, 2, 3], "value": ["A1", "A2", "A3"]}),
+                hide_index=True,
+            )
         with col_b:
             st.write("### Data B")
-            st.dataframe(pd.DataFrame({"id": [2, 3, 4], "value": ["B1", "B2", "B3"]}), hide_index=True)
-        
-        operation = st.selectbox("Choose how to handle these data:", ("INNER JOIN", "LEFT JOIN", "FULL OUTER JOIN", "UNION", "EXCEPT"))
+            st.dataframe(
+                pd.DataFrame({"id": [2, 3, 4], "value": ["B1", "B2", "B3"]}),
+                hide_index=True,
+            )
+
+        operation = st.selectbox(
+            "Choose how to handle these data:",
+            ("INNER JOIN", "LEFT JOIN", "FULL OUTER JOIN", "UNION", "EXCEPT"),
+        )
 
         if cluster_id:
             if st.button("Perform"):
@@ -97,19 +107,23 @@ with tab_b:
     st.info(
         """
         #### Extensions
-        [Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/index.html) also works with Scala, R, and integrates with your local IDE.
-        """
+        - [Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/index.html) also works with Scala, R, and integrates with your local IDE.
+        """,
+        icon="ℹ️",
     )
 
 with tab_c:
+    st.write(
+        "- Ensure your [App principal](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html#how-does-databricks-apps-manage-authorization) `Can Attach To` the cluster."
+    )
     st.checkbox(
-        "[Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/python/index.html) installed via `requirements.txt`", 
-        value=True
+        "[Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/python/index.html) installed via `requirements.txt`",
+        value=True,
     )
     st.checkbox(
         "[Databricks OAuth](https://docs.databricks.com/dev-tools/api/latest/authentication.html#using-oauth) credentials set in the [environment](https://docs.databricks.com/en/dev-tools/databricks-apps/configuration.html#databricks-apps-environment-variables)",
-        value=bool(os.getenv("DATABRICKS_CLIENT_ID") and os.getenv("DATABRICKS_CLIENT_SECRET")),
-    )
-    st.write(
-        "- Ensure your [App principal](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html#how-does-databricks-apps-manage-authorization) `Can Attach To` the cluster."
+        value=bool(
+            os.getenv("DATABRICKS_CLIENT_ID")
+            and os.getenv("DATABRICKS_CLIENT_SECRET")
+        ),
     )

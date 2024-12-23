@@ -6,7 +6,7 @@ st.write(
     "This recipe gets information about the user accessing this Databricks App from their [HTTP headers](https://docs.databricks.com/en/dev-tools/databricks-apps/app-development.html#what-http-headers-are-passed-to-databricks-apps)."
 )
 st.info(
-    "Currently, user permissions don't get promoted to Apps. Instead, [App principals](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html#how-does-databricks-apps-manage-authorization) " 
+    "Currently, user permissions don't get promoted to Apps. Instead, [App principals](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html#how-does-databricks-apps-manage-authorization) "
     "are used to access Databricks resources."
 )
 
@@ -39,14 +39,13 @@ with tab_b:
         user  = headers.get("X-Forwarded-User")
         ip = headers.get("X-Real-Ip")
 
-        print(f"E-mail: {email}, username: {username}, user: {user}, ip: {ip}")
+        st.write(f"E-mail: {email}, username: {username}, user: {user}, ip: {ip}")
         """
     )
     st.info(
         """
         #### Extensions
-        Dash, Flask: Use [`request.headers`](https://flask.palletsprojects.com/en/stable/api/#flask.Request.headers) from `flask` Python library.
-
-        Shiny: Use the [`session$request`](https://shiny.rstudio.com/articles/accessing-network-headers.html) object to extract headers in Shiny R.
+        - Dash, Flask: Use [`request.headers`](https://flask.palletsprojects.com/en/stable/api/#flask.Request.headers) from `flask` Python library.
+        - Shiny: Use the [`session$request`](https://shiny.rstudio.com/articles/accessing-network-headers.html) object to extract headers in Shiny R.
         """
     )
