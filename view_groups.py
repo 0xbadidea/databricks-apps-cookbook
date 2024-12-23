@@ -28,8 +28,8 @@ groups = [
     {
         "title": "Workflows",
         "views": [
-            {"label": "Trigger a Pipeline", "page": "views/pipelines_trigger.py", "icon": ":material/valve:"},
-            {"label": "Trigger a Job", "page": "views/workflows_trigger.py", "icon": ":material/valve:"},
+            {"label": "Run a Pipeline", "page": "views/pipelines_run.py", "icon": ":material/valve:"},
+            {"label": "Run a Job", "page": "views/workflows_run.py", "icon": ":material/valve:"},
             {"label": "Get Job Results", "page": "views/workflows_get_results.py", "icon": ":material/account_tree:"},
         ],
     },

@@ -6,7 +6,7 @@ from databricks.sdk import WorkspaceClient
 w = WorkspaceClient()
 
 st.header(body="Workflows", divider=True)
-st.subheader("Trigger a Job with Inputs")
+st.subheader("Run a Job")
 
 tab1, tab2 = st.tabs(["Try It", "Code"])
 
@@ -42,7 +42,7 @@ with tab1:
         placeholder="{\"param1\": \"value1\", \"param2\": \"value2\"}",
     )
 
-    if st.button(label="Trigger Workflow", icon=":material/play-circle:"):
+    if st.button(label="Trigger Workflow"):
         if not job_id.strip():
             st.warning("Please specify a valid job ID.", icon="⚠️")
         elif not parameters_input.strip():
