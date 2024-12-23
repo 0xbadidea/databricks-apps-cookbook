@@ -161,7 +161,7 @@ table = [
 
         response = w.serving_endpoints.query(
             name="llm-text-completions-model",
-            prompt="Generate a recipe for building scalable Databricks Apps",
+            prompt="Generate a recipe for building scalable Databricks Apps.",
             temperature=0.5,
         )
         st.json(response.as_dict())
@@ -189,7 +189,7 @@ table = [
                 ),
                 ChatMessage(
                     role=ChatMessageRole.USER, 
-                    content=prompt,
+                    content="Provide tips for deploying Databricks Apps.",
                 ),
             ],
         )
