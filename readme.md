@@ -1,6 +1,6 @@
 ## 📖 Databricks Apps Cookbook
 
-This cookbook provides reusable examples for building interactive data [Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html) on Databricks. [Streamlit](https://streamlit.io/)'s pre-built Python components simplify creating intuitive user interfaces (UIs) for data exploration and operations:
+This cookbook provides reusable examples for building interactive data [Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html) on Databricks. [Streamlit](https://streamlit.io/)'s pre-built Python components simplify creating intuitive interfaces for data exploration and operations:
 ![Cookbook](assets/cookbook.png)
 
 With these recipes, you’ll learn how to:
@@ -33,7 +33,8 @@ We welcome contributions! Submit a pull request to fix issues or add features. F
 ### 🗺️ Roadmap
 - Add an example for Genie API integration.
 - Create workflows for vector embedding and querying.
-- Implement interactive dashboards.
+- Implement interactive data dashboards.
+- Implement an ML monitoring dashboard.
 - Add tests.
 - Include advanced error-handling examples.
 - Improve type annotations.
