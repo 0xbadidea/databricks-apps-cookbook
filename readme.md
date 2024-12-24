@@ -1,4 +1,5 @@
 ## 📖 Databricks Apps Cookbook
+_This is **not** an official Databricks guide. **All** implementations represent the authors' personal perspectives._
 
 This cookbook provides reusable examples for building interactive data [Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html) on Databricks. [Streamlit](https://streamlit.io/)'s pre-built Python components simplify creating intuitive interfaces for data exploration and operations:
 ![Cookbook](assets/cookbook.png)
