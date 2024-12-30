@@ -13,21 +13,13 @@ st.markdown(
 )
 
 st.header("🔥 Recipes", divider=True)
-recipes = [
-    [
-        {"label": view.get("label"), "page": view.get("page")}
-        for view in group["views"]
-    ]
-    for group in groups
-    if group.get("title")
-]
-
-columns = st.columns(len(recipes))
-for col, links in zip(columns, recipes):
+groups = [group for group in groups if group.get("title")]
+columns = st.columns(len(groups))
+for col, group in zip(columns, groups):
     with col:
         with st.container(border=True):
-            for link in links:
-                st.page_link(page=link["page"], label=link["label"])
+            for view in group["views"]:
+                st.page_link(page=view["page"], label=view["label"], help=view["help"])
 
 st.header("🔗 Useful Links", divider=True)
 col_a, col_b, col_c = st.columns(3)
