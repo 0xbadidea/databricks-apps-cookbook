@@ -1,16 +1,12 @@
 import streamlit as st
 
 st.header(body="Users", divider=True)
-st.subheader("Get Current User")
+st.subheader("Get current user")
 st.write(
     "This recipe gets information about the user accessing this Databricks App from their [HTTP headers](https://docs.databricks.com/en/dev-tools/databricks-apps/app-development.html#what-http-headers-are-passed-to-databricks-apps)."
 )
-st.info(
-    "Currently, user permissions don't get promoted to Apps. Instead, [App principals](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html#how-does-databricks-apps-manage-authorization) "
-    "are used to access Databricks resources."
-)
 
-tab_a, tab_b = st.tabs(["**Try**", "**Implement**"])
+tab_a, tab_b, tab_c = st.tabs(["**Try it**", "**Code snippet**", "**Requirements**"])
 
 with tab_a:
     headers = st.context.headers

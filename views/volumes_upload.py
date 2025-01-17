@@ -8,23 +8,14 @@ databricks_host = os.getenv("DATABRICKS_HOST")
 w = WorkspaceClient()
 
 st.header(body="Volumes", divider=True)
-st.subheader("Upload a File")
+st.subheader("Upload a file")
 
-tab1, tab2 = st.tabs(["Code", "Try It"])
+st.write(
+    "This recipe uploads a file to a [Unity Catalog volume](https://docs.databricks.com/en/volumes/index.html)."
+)
 
-with tab1:
-    st.code("""
-    import streamlit as st
-    from databricks.sdk import WorkspaceClient
-    
-    w = WorkspaceClient()
-    
-    uploaded_file = st.file_uploader()
-    
-    file_bytes = uploaded_file.read()
-    binary_data = io.BytesIO(file_bytes)
-    w.files.upload("/Volumes/catalog/schema/volume_name/file_name.csv", binary_data, overwrite=True)
-    """)
+tab1, tab2, tab3 = st.tabs(["**Try it**", "**Code snippet**", "**Requirements**"])
+
 
 def check_upload_permissions(volume_name: str):
     try:
@@ -48,22 +39,11 @@ def check_upload_permissions(volume_name: str):
     except Exception as e:
         return f"Error: {e}"
 
+
 if "volume_check_success" not in st.session_state:
     st.session_state.volume_check_success = False
 
-with tab2:
-    st.info(
-        body="""
-        To upload a file to a volume, your app's service principal needs the following permissions:
-        * `USE CATALOG` on the volume's catalog
-        * `USE SCHEMA` on the volume's schema
-        * `READ VOLUME` and `WRITE VOLUME` on the volume
-
-        See [Privileges required for volume operations](https://docs.databricks.com/en/volumes/privileges.html#privileges-required-for-volume-operations) for more information.
-        """,
-        icon="ℹ️",
-    )
-
+with tab1:
     upload_volume_path = st.text_input(
         label="Specify a three-level Unity Catalog volume name (catalog.schema.volume_name)",
         placeholder="main.marketing.raw_files",
@@ -101,15 +81,34 @@ with tab2:
                         f"/Volumes/{catalog}/{schema}/{volume_name}/{file_name}"
                     )
                     w.files.upload(volume_file_path, binary_data, overwrite=True)
-                    volume_url = f'https://{databricks_host}/explore/data/volumes/{catalog}/{schema}/{volume_name}'
+                    volume_url = f"https://{databricks_host}/explore/data/volumes/{catalog}/{schema}/{volume_name}"
                     st.success(
                         f"File '{file_name}' successfully uploaded to **{upload_volume_path}**. [Go to volume]({volume_url}).",
                         icon="✅",
                     )
                 except Exception as e:
                     st.error(f"Error uploading file: {e}", icon="🚨")
-    else:
-        st.info(
-            "Please validate the volume and permissions before uploading a file.",
-            icon="ℹ️",
-        )
+
+with tab2:
+    st.code("""
+    import streamlit as st
+    from databricks.sdk import WorkspaceClient
+    
+    w = WorkspaceClient()
+    
+    uploaded_file = st.file_uploader()
+    
+    file_bytes = uploaded_file.read()
+    binary_data = io.BytesIO(file_bytes)
+    w.files.upload("/Volumes/catalog/schema/volume_name/file_name.csv", binary_data, overwrite=True)
+    """)
+
+with tab3:
+    st.markdown("""
+    To upload a file to a volume, your app service principal needs the following permissions:
+    * `USE CATALOG` on the volume's catalog
+    * `USE SCHEMA` on the volume's schema
+    * `READ VOLUME` and `WRITE VOLUME` on the volume
+
+    See [Privileges required for volume operations](https://docs.databricks.com/en/volumes/privileges.html#privileges-required-for-volume-operations) for more information. 
+    """)

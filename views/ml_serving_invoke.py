@@ -1,19 +1,18 @@
 import os
 from json import loads
 import streamlit as st
-import pandas as pd
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
 
 w = WorkspaceClient()
 
 st.header(body="Machine Learning", divider=True)
-st.subheader("Invoke a Model")
+st.subheader("Invoke a model")
 st.write(
-    "This recipe invokes a model **across classical ML and Large Language (LLMs)** hosted on Databricks ML Serving with UI inputs."
+    "This recipe invokes a model hosted on Mosaic AI Model Serving and returns the result. Choose either a traditional ML model or a large language model (LLM)."
 )
 
-tab_a, tab_b, tab_c = st.tabs(["**Try**", "**Implement**", "**Setup**"])
+tab_a, tab_b, tab_c = st.tabs(["**Try it**", "**Code snippet**", "**Requirements**"])
 
 with tab_a:
     endpoints = w.serving_endpoints.list()
@@ -21,9 +20,11 @@ with tab_a:
 
     col1, col2 = st.columns([2, 1])
     with col1:
-        selected_model = st.selectbox("Select a Serving model:", endpoint_names)
+        selected_model = st.selectbox(
+            "Select a model served by Model Serving", endpoint_names
+        )
     with col2:
-        model_type = st.radio("Model type:", ["LLM", "Classical ML"])
+        model_type = st.radio("Model type", ["LLM", "Traditional ML"])
 
     if model_type == "LLM":
         temperature = st.slider(
@@ -34,9 +35,7 @@ with tab_a:
             step=0.1,
             help="Controls the randomness of the LLM output. Only applicable for chat/completions queries.",
         )
-        prompt = st.text_area(
-            "Enter your prompt:", placeholder="Ask something..."
-        )
+        prompt = st.text_area("Enter your prompt:", placeholder="Ask something...")
         if st.button("Invoke LLM"):
             response = w.serving_endpoints.query(
                 name=selected_model,
@@ -54,9 +53,9 @@ with tab_a:
             )
             st.json(response.as_dict())
 
-    elif model_type == "Classical ML":
+    elif model_type == "Traditional ML":
         st.info(
-            "The model has to be [deployed](https://docs.databricks.com/en/machine-learning/model-serving/create-manage-serving-endpoints.html#create-an-endpoint) to Serving. Request pattern corresponds to the model signature [registered in the Catalog](https://docs.databricks.com/en/machine-learning/manage-model-lifecycle/index.html#train-and-register-unity-catalog-compatible-models)."
+            "The model has to be [deployed](https://docs.databricks.com/en/machine-learning/model-serving/create-manage-serving-endpoints.html#create-an-endpoint) to Mosaic AI Model Serving. Request pattern corresponds to the model signature [registered in Unity Catalog](https://docs.databricks.com/en/machine-learning/manage-model-lifecycle/index.html#train-and-register-unity-catalog-compatible-models)."
         )
         input_value = st.text_area(
             "Enter model input",
@@ -70,7 +69,7 @@ with tab_a:
 
 table = [
     {
-        "type": "Classical Models (e.g., scikit-learn, XGBoost)",
+        "type": "Traditional Models (e.g., scikit-learn, XGBoost)",
         "param": "dataframe_split",
         "description": "JSON-serialized DataFrame in split orientation.",
         "code": """
@@ -92,7 +91,7 @@ table = [
         """,
     },
     {
-        "type": "Classical Models",
+        "type": "Traditional Models",
         "param": "dataframe_records",
         "description": "JSON-serialized DataFrame in records orientation.",
         "code": """
@@ -226,21 +225,11 @@ table = [
     },
 ]
 
-
-def render_row(column, row):
-    with column:
-        st.markdown(
-            f"**{row['type']}** accept `{row['param']}`: {row['description']}"
-        )
-        st.markdown(row["code"])
-        st.divider()
-
-
 with tab_b:
-    col_1, col_2 = st.columns(2)
     for i, row in enumerate(table):
-        target_col = col_1 if i % 2 == 0 else col_2
-        render_row(target_col, row)
+        with st.expander(f"**{row['type']} ({row['param']})**", expanded=(i == 0)):
+            st.markdown(f"**Description**: {row['description']}")
+            st.markdown(row["code"])
 
     st.info(
         """
@@ -268,7 +257,6 @@ with tab_c:
     st.checkbox(
         "[Databricks OAuth](https://docs.databricks.com/dev-tools/api/latest/authentication.html#using-oauth) credentials set in the [environment](https://docs.databricks.com/en/dev-tools/databricks-apps/configuration.html#databricks-apps-environment-variables)",
         value=bool(
-            os.getenv("DATABRICKS_CLIENT_ID")
-            and os.getenv("DATABRICKS_CLIENT_SECRET")
+            os.getenv("DATABRICKS_CLIENT_ID") and os.getenv("DATABRICKS_CLIENT_SECRET")
         ),
     )

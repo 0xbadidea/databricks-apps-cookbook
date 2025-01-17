@@ -10,14 +10,14 @@ st.write(
     This recipe uses [Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/python/index.html) to execute pre-defined Python or SQL code on a **shared** cluster with UI inputs. 
     """
 )
-tab_a, tab_b, tab_c = st.tabs(["**Try**", "**Implement**", "**Setup**"])
+tab_a, tab_b, tab_c = st.tabs(["**Try it**", "**Code snippet**", "**Requirements**"])
 
 server_hostname = os.getenv("DATABRICKS_HOST")
 
 
 def connect_to_cluster(cluster_id):
     return DatabricksSession.builder.remote(
-        host=databricks_host, cluster_id=cluster_id
+        host=server_hostname, cluster_id=cluster_id
     ).getOrCreate()
 
 
@@ -123,7 +123,6 @@ with tab_c:
     st.checkbox(
         "[Databricks OAuth](https://docs.databricks.com/dev-tools/api/latest/authentication.html#using-oauth) credentials set in the [environment](https://docs.databricks.com/en/dev-tools/databricks-apps/configuration.html#databricks-apps-environment-variables)",
         value=bool(
-            os.getenv("DATABRICKS_CLIENT_ID")
-            and os.getenv("DATABRICKS_CLIENT_SECRET")
+            os.getenv("DATABRICKS_CLIENT_ID") and os.getenv("DATABRICKS_CLIENT_SECRET")
         ),
     )

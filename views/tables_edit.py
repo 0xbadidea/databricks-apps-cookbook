@@ -6,9 +6,9 @@ from databricks.sdk.core import Config, oauth_service_principal
 
 
 st.header(body="Tables", divider=True)
-st.subheader("Edit a Table")
+st.subheader("Edit a table")
 st.write(
-    "Streamline your **small** data workflows on Databricks by interactively editing a Catalog table and applying the changed rows directly back."
+    "Use this recipe to read, edit, and write back data stored in a Unity Catalog table using the [Databricks SQL Connector for Python](https://docs.databricks.com/en/dev-tools/python-sql-connector.html)."
 )
 
 server_hostname = os.getenv("DATABRICKS_HOST")
@@ -64,7 +64,7 @@ def insert_overwrite_table(table_name, df):
             st.success(f"Changes saved")
 
 
-tab_a, tab_b, tab_c = st.tabs(["**Try**", "**Implement**", "**Setup**"])
+tab_a, tab_b, tab_c = st.tabs(["**Try it**", "**Code snippet**", "**Requirements**"])
 
 with tab_a:
     original_df = pd.DataFrame(

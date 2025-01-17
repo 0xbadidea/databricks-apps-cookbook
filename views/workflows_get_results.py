@@ -6,47 +6,46 @@ from databricks.sdk import WorkspaceClient
 w = WorkspaceClient()
 
 st.header(body="Workflows", divider=True)
-st.subheader("Get Job Results")
+st.subheader("Retrieve job results")
 
-tab1, tab2 = st.tabs(["Try It", "Code"])
+st.write(
+    "This recipe retreives the results of a [Databricks Workflows](https://docs.databricks.com/en/jobs/index.html) job task run."
+)
 
-def fetch_workflow_results(workflow_id: str):
-    try:
-        run = w.jobs.runs_get(run_id=workflow_id)
-        return {
-            "status": run.state.life_cycle_state,
-            "result": run.state.result_state,
-        }
-    except Exception as e:
-        return {"error": str(e)}
+tab1, tab2, tab3 = st.tabs(["**Try it**", "**Code snippet**", "**Requirements**"])
 
 if "workflow_check_success" not in st.session_state:
     st.session_state.workflow_check_success = False
 
 with tab1:
-    st.info(
-        body="""
-        To retrieve results from a workflow, provide the workflow run ID.
-        Ensure the app's service principal has the necessary permissions to access workflows.
-        """,
-        icon="ℹ️",
+    task_run_id = st.text_input(
+        label="Specify a task run ID",
+        placeholder="293894477334278",
     )
 
-    workflow_id = st.text_input(
-        label="Specify the Workflow Run ID",
-        placeholder="workflow-id",
-    )
-
-    if st.button(label="Get Workflow Results", icon=":material/play-circle: "):
-        if not workflow_id.strip():
-            st.warning("Please specify a valid workflow run ID.", icon="⚠️")
+    if st.button(label="Get task run results"):
+        if not task_run_id.strip():
+            st.warning("Please specify a valid task run ID.", icon="⚠️")
         else:
-            results = fetch_workflow_results(workflow_id.strip())
-            if "error" in results:
-                st.error(f"Error fetching workflow results: {results['error']}", icon="🚨")
-            else:
-                st.success("Workflow results retrieved successfully", icon="✅")
-                st.json(results)
+            results = w.jobs.get_run_output(task_run_id)
+
+            st.success("Task run results retrieved successfully", icon="✅")
+
+            if results.sql_output:
+                st.markdown("**SQL output**")
+                st.json(results.sql_output.as_dict())
+
+            if results.dbt_output:
+                st.markdown("**dbt output**")
+                st.json(results.dbt_output.as_dict())
+
+            if results.run_job_output:
+                st.markdown("**Notebook output**")
+                st.json(results.run_job_output.as_dict())
+
+            if results.notebook_output:
+                st.markdown("**Notebook output**")
+                st.json(results.notebook_output.as_dict())
 
 with tab2:
     st.code("""
@@ -60,4 +59,11 @@ with tab2:
     run = w.jobs.runs_get(run_id=workflow_id)
     print(f"Workflow status: {run.state.life_cycle_state}")
     print(f"Result: {run.state.result_state}")
+    """)
+
+with tab3:
+    st.markdown("""
+    To retrieve the results of a job run, your app service principal needs at least the `Can View` permission on the job.
+
+    See [Control access to a job](https://docs.databricks.com/en/jobs/privileges.html#control-access-to-a-job) for more information. 
     """)

@@ -5,9 +5,9 @@ from databricks import sql
 from databricks.sdk.core import Config, oauth_service_principal
 
 st.header(body="Tables", divider=True)
-st.subheader("Read a Table")
+st.subheader("Read a table")
 st.write(
-    "This recipe retrieves a Catalog table using [Databricks SQL](https://docs.databricks.com/integrations/python/sql.html)."
+    "This recipe reads a Unity Catalog table using the [Databricks SQL Connector for Python](https://docs.databricks.com/en/dev-tools/python-sql-connector.html)."
 )
 
 server_hostname = os.getenv("DATABRICKS_HOST")
@@ -37,11 +37,11 @@ def read_table(table_name):
             return pd.DataFrame(cursor.fetchall())
 
 
-tab_a, tab_b, tab_c = st.tabs(["**Try**", "**Implement**", "**Setup**"])
+tab_a, tab_b, tab_c = st.tabs(["**Try it**", "**Code snippet**", "**Requirements**"])
 
 with tab_a:
     table_name = st.text_input(
-        "Specify a Catalog table name:",
+        "Specify a Unity Catalog table name:",
         placeholder="catalog.schema.table",
         help="Copy the three-level table name from the [Catalog](https://docs.databricks.com/en/data-governance/unity-catalog/index.html#granting-and-revoking-access-to-database-objects-and-other-securable-objects-in-unity-catalog).",
     )
@@ -82,7 +82,7 @@ with tab_b:
                     cursor.execute(query)
                     return pd.DataFrame(cursor.fetchall())
 
-        table_name = st.text_input("Specify a Catalog table name:", placeholder="catalog.schema.table")
+        table_name = st.text_input("Specify a Unity Catalog table name:", placeholder="catalog.schema.table")
         if table_name:
             df = read_table(table_name)
             st.dataframe(df)
